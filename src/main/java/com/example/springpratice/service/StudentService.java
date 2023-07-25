@@ -17,25 +17,25 @@ public class StudentService {
     @Autowired
     private StudentRepository studentRepository;
 
-    public StudentEntity createStudent(StudentEntity studentEntity){
-        return studentRepository.save(studentEntity);
+    public StudentDTO createStudent(StudentDTO studentDTO){
+        return studentEntityToStudentDTO(studentRepository.save(studentDTOToStudentEntity(studentDTO)));
     }
 
     public List<StudentDTO> getAllStudents(){
         List<StudentEntity> students = studentRepository.findAll();
-        return students.stream().map(this::mapToDTO).collect(Collectors.toList());
+        return students.stream().map(this::studentEntityToStudentDTO).collect(Collectors.toList());
     }
 
-    public StudentEntity getStudentById(Long id){
-        return studentRepository.findById(id).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+    public StudentDTO getStudentById(Long id){
+        return studentEntityToStudentDTO(studentRepository.findById(id).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found")));
     }
 
-    public StudentEntity updateStudent(Long id, StudentEntity studentEntity){
-        return studentRepository.findById(id)
+    public StudentDTO updateStudent(Long id, StudentDTO studentDTO){
+        return studentEntityToStudentDTO(studentRepository.findById(id)
                 .map( student -> {
-                    student.setName(studentEntity.getName());
+                    student.setName(studentDTO.getName());
                     return studentRepository.save(student);
-                }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+                }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found")));
     }
 
     public void deleteStudent(Long id){
@@ -45,7 +45,14 @@ public class StudentService {
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
     }
 
-    private StudentDTO mapToDTO(StudentEntity studentEntity){
+    private StudentEntity studentDTOToStudentEntity (StudentDTO studentDTO){
+        StudentEntity studentEntity = new StudentEntity();
+        studentEntity.setId(studentDTO.getId());
+        studentEntity.setName(studentDTO.getName());
+        return studentEntity;
+    }
+
+    private StudentDTO studentEntityToStudentDTO(StudentEntity studentEntity){
         StudentDTO studentDTO = new StudentDTO();
         studentDTO.setId(studentEntity.getId());
         studentDTO.setName(studentEntity.getName());

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,18 +53,53 @@ class StudentControllerTest {
     }
 
     @Test
-    void getById() {
+    void getById() throws Exception {
+        Long studentId = 1L;
+        StudentDTO studentDTO = new StudentDTO(studentId, "Joao");
+        when(service.getStudentById(studentId)).thenReturn(studentDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/student/{id}", studentId))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().json("{\"name\":\"Joao\",\"id\":1}"));
     }
 
     @Test
-    void post() {
+    void post() throws Exception {
+        StudentDTO studentDTOToCreate = new StudentDTO(null, "Joao");
+        StudentDTO studentDTOCreated = new StudentDTO(1L, "Joao");
+        when(service.createStudent(studentDTOToCreate)).thenReturn(studentDTOCreated);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/student")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Joao\"}"))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().json("{\"name\":\"Joao\",\"id\":1}"));
     }
 
     @Test
-    void put() {
+    void put() throws Exception{
+        Long studentId = 1L;
+        StudentDTO studentDTO = new StudentDTO(studentId, "Joao");
+        when(service.updateStudent(eq(studentId), any(StudentDTO.class))).thenReturn(studentDTO);
+
+        String studentDTOJson = new ObjectMapper().writeValueAsString(studentDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/student/{id}", studentId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(studentDTOJson))
+                .andExpect(MockMvcResultMatchers.status().isNoContent())
+                .andExpect(MockMvcResultMatchers.jsonPath("id").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("name").value("Joao"));
     }
 
     @Test
-    void delete() {
+    void delete() throws Exception{
+        Long studentId = 1L;
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/student/{id}", studentId))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        // Verify times when service.deleteStudent was called when get a exist studentId
+        verify(service, times(1)).deleteStudent(studentId);
     }
+
 }

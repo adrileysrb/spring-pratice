@@ -23,20 +23,20 @@ public class StudentController {
     }
 
     @GetMapping("{id}")
-    public StudentEntity getById(@PathVariable Long id) {
+    public StudentDTO getById(@PathVariable Long id) {
         return service.getStudentById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public StudentEntity post(@RequestBody @Valid StudentEntity studentEntity){
-        return service.createStudent(studentEntity);
+    public StudentDTO post(@RequestBody @Valid StudentDTO studentDTO){
+        return service.createStudent(studentDTO);
     }
 
     @PutMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public StudentEntity put(@PathVariable Long id, @RequestBody @Valid StudentEntity studentEntity){
-        return service.updateStudent(id, studentEntity);
+    public StudentDTO put(@PathVariable Long id, @RequestBody @Valid StudentDTO studentDTO){
+        return service.updateStudent(id, studentDTO);
     }
 
     @DeleteMapping("{id}")
